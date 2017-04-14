@@ -1,0 +1,7 @@
+#+TITLE: Speller
+
+* What is it?
+Speller is a program design to correct spelling, with specific emphasis on
+customizing it's spelling corrections to the users needs overtime. It does this
+through the use of classifiers trained on your text along with text from others
+to provide a more integrated, individual user experience.
