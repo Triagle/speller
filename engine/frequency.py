@@ -3,9 +3,10 @@ the top 1000 most common words. P(r) is given by 0.1/r, where 1 < r < 1000.
 1000 words is the limit as beyond that the harmonic series diverges for less
 frequent words. About 50% of all words in the Oxford English Corpus reside in
 the top 100 words. """
+from db import serializer
 
 
-class Frequency():
+class Frequency(serializer.Serializable):
     """ Contains the state for the frequency analysis. """
     frequency_map = None
 
