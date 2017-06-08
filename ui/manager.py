@@ -26,3 +26,4 @@ class UIManager:
     def run(self):
         """ Run UIManager. """
         self.main_window.show()
+        return self.application.exec_()

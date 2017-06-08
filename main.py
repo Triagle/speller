@@ -5,9 +5,7 @@ from ui import manager
 
 def main():
     """ Main program entry function"""
-    app = QtWidgets.QApplication(sys.argv)
     ui = manager.UIManager()
-    ui.run()
-    app.exec()
+    sys.exit(ui.run())
 
 main()
