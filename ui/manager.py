@@ -11,9 +11,11 @@ class UIManager:
         dialog = QDialog(self.main_window)
         self.corrections_dialog.setupUi(dialog)
         dialog.exec()
+
     def connect_slots(self):
         """ Connect UI slots for various ui objects"""
-        self.main_window_state.actionCorrections.trigger.connect()
+        self.main_window_state.actionCorrections.triggered.connect(self.show_dialog)
+
     def __init__(self):
         """ Setup UI objects. """
         self.application = QApplication(sys.argv)
