@@ -67,8 +67,9 @@ class Classifier(Serializable):
 
     def train(self, dataset):
         """ Train the classifier from a dataset. """
-        dataset_length = sum([len(v) for _, v in dataset])
-        for cls, points in dataset:
+        items = dataset.items()
+        dataset_length = sum([len(v) for _, v in items])
+        for cls, points in items:
             cls_type = Type(cls, len(points) / dataset_length)
             cls_type.train(points)
             self.classes.append(cls_type)
