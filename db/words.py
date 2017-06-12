@@ -20,7 +20,7 @@ def get_word_for_id(cursor, word_id):
 
 def word_exists(cursor, word):
     """ Returns true if words is in database. """
-    return get_id_for_word(word) is not None
+    return get_id_for_word(cursor, word) is not None
 
 def get_word_list(cursor):
     """ Return a list of all words. """
