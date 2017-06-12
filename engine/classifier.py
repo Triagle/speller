@@ -8,10 +8,10 @@ import json
 class Type(Serializable):
     """ Calculates the probability that an object belongs to a given class. """
 
-    def __init__(self, cls, class_probability):
+    def __init__(self, cls, class_probability, property_probability=None):
         self.cls = cls
         self.class_probability = class_probability
-        self.property_probability = {}
+        self.property_probability = property_probability or {}
 
     def train(self, dataset):
         """ Train the type classifier from a dataset. """
@@ -28,6 +28,7 @@ class Type(Serializable):
     def as_json(self):
         ''' Return a json friendly representation of Type class. '''
         return {'__type__': True,
+                'class': self.cls,
                 'class_probability': self.class_probability,
                 'properties': self.property_probability}
 
@@ -46,12 +47,19 @@ class Type(Serializable):
         return probability
 
 
+def as_classifier(dct):
+    ''' Special object hooks to deserialize classifier json objects '''
+    if '__classifier__' in dct:
+        return dct['classes']
+    elif '__type__' in dct:
+        return (dct['class'], dct['class_probability'], dct['properties'])
+
 class Classifier(Serializable):
     """ General purpose bayesian classifier. """
 
-    def __init__(self, classes=[]):
+    def __init__(self, classes=None):
         ''' Initialize Classifier. '''
-        self.classes = []
+        self.classes = classes or []
         serialize_table = {
             'data': 'json_rep'
         }
@@ -67,7 +75,15 @@ class Classifier(Serializable):
 
     @property
     def json_rep(self):
+        ''' Return the classifier as in a json friendly format. '''
         return json.dumps(self, cls=ClassifierEncoder)
+
+    @json_rep.setter
+    def json_rep(self, json_string):
+        ''' Update the state of the classifier using a json string. '''
+        class_array = json.loads(json_string, object_hook=as_classifier)
+        types = [Type(*prop) for prop in class_array]
+        self.classes = types
 
     def as_json(self):
         ''' Return a json friendly representation of Classifier'''
@@ -88,6 +104,7 @@ class ClassifierEncoder(json.JSONEncoder):
     ''' Encode Classifier and Properties to json format for database
     insertion. '''
     def default(self, obj):
+        ''' Default encoding function. '''
         if isinstance(obj, Classifier) or isinstance(obj, Type):
             return obj.as_json()
 
