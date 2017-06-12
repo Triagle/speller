@@ -1,7 +1,4 @@
-import sqlite3
-
-
-class Serializable():
+class Serializable(object):
     ''' Serializable class that implements methods for objects wishing to serialize to tables. '''
 
     def __init__(self, serialize_table):
