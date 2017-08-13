@@ -40,10 +40,7 @@ class Type(serializer.Serializable):
         """ Return the classification of an object given it's properties. """
         probability = self.class_probability
         for prop in properties:
-            if prop in self.property_probability:
-                probability *= self.property_probability[prop]
-            else:
-                return 0
+            probability *= self.property_probability.get(prop, 0)
         return probability
 
     def __repr__(self):
@@ -96,14 +93,15 @@ class Classifier(serializer.Serializable):
         ''' Return a json friendly representation of Classifier'''
         return {'__classifier__': True, 'classes': self.classes}
 
-    def classify(self, properties):
+    def classify(self, properties, assumptions={}):
         """ Classify an object into a class. """
-        likely_cls = (None, 0)
+        likely_cls = (0, None)
         for cls in self.classes:
             prob = cls.probability(properties)
-            (_, max_prob) = likely_cls
+            prob *= assumptions.get(cls, 1)
+            (max_prob, _) = likely_cls
             if prob > max_prob:
-                likely_cls = (cls.cls, prob)
+                likely_cls = (prob, cls.cls)
         return likely_cls
 
     def __repr__(self):
