@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import py2exe
 setup(
     name="Speller",
     version="0.1",
@@ -7,7 +6,7 @@ setup(
     scripts=['say_hello.py'],
     install_requires = [
         'PyQt5',
-        'metaphone'
+        'pyphonetics'
     ],
     package_data = {
         # Include database in installation
