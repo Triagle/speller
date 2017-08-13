@@ -9,6 +9,9 @@ HARMONIC_LIMIT = 1000
 
 def frequency_of(rank, harmonic_limit=HARMONIC_LIMIT):
     """ Rank a word according to zipf's law.
-    e.g frequency.rank("the") -> 0.1 # (0.1 / 1)
+    >>> frequency_of(1)
+    0.1
+    >>> frequency_of(3)
+    0.1 / 3
     """
     return 0.1 / min(rank, 10000)
