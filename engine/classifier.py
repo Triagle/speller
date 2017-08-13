@@ -1,11 +1,11 @@
 """ A naive bayesian classifier implementation that provides a general purpose,
 yet flexible method of classifying objects into classes. """
 
-from db import Serializable
+from db import serializer
 import json
 
 
-class Type(Serializable):
+class Type(serializer.Serializable):
     """ Calculates the probability that an object belongs to a given class. """
 
     def __init__(self, cls, class_probability, property_probability=None):
@@ -46,15 +46,21 @@ class Type(Serializable):
                 return 0
         return probability
 
+    def __repr__(self):
+        return f'Type({self.cls}, {self.property_probability})'
+
 
 def as_classifier(dct):
     ''' Special object hooks to deserialize classifier json objects '''
     if '__classifier__' in dct:
         return dct['classes']
     elif '__type__' in dct:
-        return (dct['class'], dct['class_probability'], dct['properties'])
+        properties = {k: float(v) for k, v in dct['properties'].items()}
+        return (dct['class'], dct['class_probability'], properties)
+    return dct
 
-class Classifier(Serializable):
+
+class Classifier(serializer.Serializable):
     """ General purpose bayesian classifier. """
 
     def __init__(self, classes=None):
@@ -83,7 +89,7 @@ class Classifier(Serializable):
     def json_rep(self, json_string):
         ''' Update the state of the classifier using a json string. '''
         class_array = json.loads(json_string, object_hook=as_classifier)
-        types = [Type(*prop) for prop in class_array]
+        types = [Type(cls, cls_prob, property_probability=props) for cls, cls_prob, props in class_array]
         self.classes = types
 
     def as_json(self):
@@ -99,6 +105,9 @@ class Classifier(Serializable):
             if prob > max_prob:
                 likely_cls = (cls.cls, prob)
         return likely_cls
+
+    def __repr__(self):
+        return f'Classifier({self.classes})'
 
 
 class ClassifierEncoder(json.JSONEncoder):
