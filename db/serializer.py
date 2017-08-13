@@ -1,5 +1,9 @@
 class Serializable(object):
-    ''' Serializable class that implements methods for objects wishing to serialize to tables. '''
+    ''' Serializable class that implements methods for objects wishing to
+    serialize to SQLITE tables. This is done with a serialize table that maps
+    property names to SQLITE table columns. When insert_into is called it takes
+    the properties listed in serialize table and the corresponding table column
+    names, building an SQLITE query to use on the database. '''
 
     def __init__(self, serialize_table):
         ''' Initialize the Serializable class'''
