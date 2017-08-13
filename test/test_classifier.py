@@ -22,7 +22,7 @@ TEST_DATASET = {
                    ["round", "ripe", "orange"],
                    ["round", "orange", "sweet"],
                    ["round", "orange", "sour"]]
-}.items()
+}
 # Size: 13
 # P(B) = 5/13
 # P(A) = 4/13
@@ -44,13 +44,13 @@ def test_group_class():
 def test_classifier():
     bclassifier = classifier.Classifier()
     bclassifier.train(TEST_DATASET)
-    prediction, _ = bclassifier.classify(["round", "sour", "orange"])
+    _, prediction = bclassifier.classify(["round", "sour", "orange"])
     assert prediction == Class.ORANGE
-    prediction, _ = bclassifier.classify(["bruised", "sweet"])
+    _, prediction = bclassifier.classify(["bruised", "sweet"])
     assert prediction == Class.BANNANA
-    prediction, _ = bclassifier.classify(["ripe"])
+    _, prediction = bclassifier.classify(["ripe"])
     assert prediction == Class.BANNANA
-    prediction, _ = bclassifier.classify(["round", "sour"])
+    _, prediction = bclassifier.classify(["round", "sour"])
     assert prediction == Class.ORANGE
-    prediction, _ = bclassifier.classify(["round", "sweet"])
+    _, prediction = bclassifier.classify(["round", "sweet"])
     assert prediction == Class.APPLE
