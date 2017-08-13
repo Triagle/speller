@@ -1,27 +1,28 @@
-""" A naive bayesian classifier implementation that provides a general purpose,
-yet flexible method of classifying objects into classes. """
+''' A naive bayesian classifier implementation that provides a general purpose,
+yet flexible method of classifying objects into classes. '''
 
 from db import serializer
+from collections import Counter
 import json
 
 
 class Type(serializer.Serializable):
-    """ Calculates the probability that an object belongs to a given class. """
+    ''' Calculates the probability that an object belongs to a given class. '''
 
     def __init__(self, cls, class_probability, property_probability=None):
         self.cls = cls
         self.class_probability = class_probability
-        self.property_probability = property_probability or {}
+        self.property_probability = Counter(property_probability)
 
     def train(self, dataset):
-        """ Train the type classifier from a dataset. """
+        ''' Train the type classifier from a dataset. '''
         data_size = len(dataset)
+        # Tally up the properties across all points in the dataset.
         for point in dataset:
             for prop in point:
-                if prop in self.property_probability:
-                    self.property_probability[prop] += 1
-                else:
-                    self.property_probability[prop] = 1
+                self.property_probability[prop] += 1
+
+        # Iterate over properties and divide their probabilities by the dataset size.
         for prop, prob in self.property_probability.items():
             self.property_probability[prop] /= data_size
 
@@ -33,12 +34,17 @@ class Type(serializer.Serializable):
                 'properties': self.property_probability}
 
     def summarize(self):
-        """ Return probabilities of both classes and properties. """
+        ''' Return probabilities of both classes and properties. '''
         return (self.class_probability, self.property_probability)
 
     def probability(self, properties):
-        """ Return the classification of an object given it's properties. """
+        ''' Return the classification of an object given it's properties. '''
+        # P(t) = P(a) * P(a | b) * P(a | c) ... P(a | z)
+
+        # P(a)
         probability = self.class_probability
+
+        # P(a | b) * P(a | c) * ... P(a | z)
         for prop in properties:
             probability *= self.property_probability.get(prop, 0)
         return probability
@@ -58,7 +64,7 @@ def as_classifier(dct):
 
 
 class Classifier(serializer.Serializable):
-    """ General purpose bayesian classifier. """
+    ''' General purpose bayesian classifier. '''
 
     def __init__(self, classes=None):
         ''' Initialize Classifier. '''
@@ -69,9 +75,13 @@ class Classifier(serializer.Serializable):
         super().__init__(serialize_table)
 
     def train(self, dataset):
-        """ Train the classifier from a dataset. """
+        ''' Train the classifier from a dataset. '''
         items = dataset.items()
+        # get the length of the dataset by counting the length of each class.
         dataset_length = sum([len(v) for _, v in items])
+        # go over every class and points that identify as that class,
+        # Instantiating a type class to summarize the probabilities of
+        # properties found for points in that class.
         for cls, points in items:
             cls_type = Type(cls, len(points) / dataset_length)
             cls_type.train(points)
@@ -94,8 +104,10 @@ class Classifier(serializer.Serializable):
         return {'__classifier__': True, 'classes': self.classes}
 
     def classify(self, properties, assumptions={}):
-        """ Classify an object into a class. """
+        ''' Classify an object into a class. '''
         likely_cls = (0, None)
+        # go through every class chose the one with the highest probability to
+        # be the class the passed properties represents.
         for cls in self.classes:
             prob = cls.probability(properties)
             prob *= assumptions.get(cls, 1)
@@ -118,9 +130,9 @@ class ClassifierEncoder(json.JSONEncoder):
 
 
 def group_by_class(dataset, cls_func=lambda x: (x[0], x[1:])):
-    """ Group a list by it's class (or rather by function). e.g
+    ''' Group a list by it's class (or rather by function). e.g
     group_by_class(lambda x: (x[0], x[1:]), [[1, 2, 3], [1, 3, 4]])
-    -> {1: [[2, 3], [3, 4]]} """
+    -> {1: [[2, 3], [3, 4]]} '''
     classes = {}
     for point in dataset:
         cls, props = cls_func(point)
