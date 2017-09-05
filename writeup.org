@@ -1,1 +1,107 @@
 #+TITLE: Program Write Up
+
+* Testing
+
+Each individual test, along with inputs and expected outputs can be found in
+their respective test files in the tests directly. Because these tests are code
+you can run them as you wish, using =pytest=, the modern test framework for
+python.
+
+
+The tests are designed defensively and with code coverage in mind.
+
+Manual UI testing was also done, since this is difficult to automate. To that
+end I have created a table of all the sorts of things the user might type in,
+and how my program should handle that.
+
+Because all of the internals to the engine are already tested and working as
+expected, so the manual test set is small since it only needs to cover the
+actual user interactions with the interface.
+
+| Input                      | Expected Output                                                                                                                    |
+|----------------------------+------------------------------------------------------------------------------------------------------------------------------------|
+| "test"                     | No spelling mistakes should be reported, since tokens like "',. should be ignore if found at the start or end of a word.           |
+|----------------------------+------------------------------------------------------------------------------------------------------------------------------------|
+| "test     "                | Again no spelling mistakes should be reported, empty strings like '' should be ignored since they aren't real words.               |
+|----------------------------+------------------------------------------------------------------------------------------------------------------------------------|
+| 123457                     | No spelling mistakes should be reported, since numbers aren't misspelt.                                                            |
+|----------------------------+------------------------------------------------------------------------------------------------------------------------------------|
+| haallo                     | This should be caught as a single spelling error. At the same time I test the carousal control to make sure it                     |
+|                            | stays on the single misspelled word and doesn't crash because there is only one word to cycle through.                             |
+|----------------------------+------------------------------------------------------------------------------------------------------------------------------------|
+| haillo huullo helo         | Three spelling errors should be reported. I should be able to cycle through all of them (next and previous buttons), in a circular |
+|                            | fashion, and the highlighting on the misspelled words should match the corrections being shown.                                    |
+|----------------------------+------------------------------------------------------------------------------------------------------------------------------------|
+| this is a tset, good daee. | "tset" and "dae" should be reported as mistakes, ignoring the "," and "." in each word.                                            |
+
+An example of these tests running:
+[[file:img-2017-09-03-152810.png]]
+
+* Planning
+
+There was a fair bit of planning that went into the design and development of my
+program.
+
+
+** Initial
+
+My initial planning was done on paper, and documented how I thought the UI could
+be presented, as well as a simple flowchart of the program overall. Because I
+was also designing a database schema to hold data as well, I also designed that
+at the same time.
+
+*** GUI
+
+[[file:planning/20170903_153350.jpg]]
+*** Database
+[[file:planning/20170904_173515.jpg]]
+[[file:planning/20170904_172856.jpg]]
+*** Program
+[[file:planning/20170904_172909.jpg]]
+** Final
+For my final version of development I vastly simplified a lot of the developed
+product through optimizations and stakeholder revision. Notably my database is a
+lot smaller now and my code is a little simpler.
+
+*** GUI
+[[file:planning/20170903_154450.jpg]]
+*** Database
+[[file:planning/20170904_174717.jpg]]
+*** Program
+
+* Versioning
+
+Versioning in my program was done chiefly through the use of the =git= version
+control tool. Because I was also following the extreme programming for one
+methodology, my "versions" are little more than incremental changes I made,
+always trying to achieve a minimum viable product for each git commit. As such,
+perhaps the best log of my changes and version is found in the git log of this
+repository, accessible via the =git log= command, or in the screenshot I have
+included below.
+
+[[file:img-2017-09-03-155251.png]]
+
+The version plan was sort of worked around the project management of the
+outcome, rather than the outcome itself. It sort of based itself on the
+principles of doing what needed to be done to have it do the basic stuff like
+corrections, and then dropping in the other things that were either easy or
+extraneous to add.
+
+| Version | Plan                                                                                      |
+|---------+-------------------------------------------------------------------------------------------|
+|       1 | Get core attributes of the engine completed, including bayesian                           |
+|         | classifier, levenshtein distance, frequency analysis and database                         |
+|         | interface.                                                                                |
+|---------+-------------------------------------------------------------------------------------------|
+|       2 | Start work on UI and persistence, i.e mockup and create ui code,                          |
+|         | as well as ensuring that user modified state can be written                               |
+|         | to the database.                                                                          |
+|---------+-------------------------------------------------------------------------------------------|
+|       3 | Create an initial classifier to serve as the basis for spell checking.                    |
+|         | This involved collecting a lot of spelling data from stakeholders and using               |
+|         | some other python scripts (not included here) to massage this data into something usable  |
+|---------+-------------------------------------------------------------------------------------------|
+|       4 | Clean up cruft from previous 3 iterations, connect various UI components to corresponding |
+|         | backend actions.                                                                          |
+|---------+-------------------------------------------------------------------------------------------|
+|       5 | Add any missing tests to ensure maximal coverage.                                         |
