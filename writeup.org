@@ -2,11 +2,8 @@
 
 * Testing
 
-Each individual test, along with inputs and expected outputs can be found in
-their respective test files in the tests directly. Because these tests are code
-you can run them as you wish, using =pytest=, the modern test framework for
-python.
 
+** Manual Testing
 
 The tests are designed defensively and with code coverage in mind.
 
@@ -36,6 +33,33 @@ actual user interactions with the interface.
 
 An example of these tests running:
 [[file:img-2017-09-03-152810.png]]
+
+** Automated testing
+
+Each individual test, along with inputs and expected outputs can be found in
+their respective test files in the tests directly. Because these tests are code
+you can run them as you wish, using =pytest=, the modern test framework for
+python.
+
+The most important areas to test was the cyclical list, the classifier, the
+database interface and the serializer interface.
+
+The cyclical list (which is a [[https://en.wikipedia.org/wiki/Doubly_linked_list][Doubly Linked Circular List]]) testing is very
+thorough, testing every method and includes edge cases. Deletion if multiple
+elements in the list exist as well as deletion if single elements or even no
+elements in the list exist are all tested there. Building the list in multiple
+different ways is also tested, to ensure the insertion is versatile. I also
+ensure that every link in a complex series of links after insertion is pointing
+at the right elements and that the length is tracked properly.
+
+Cyclical List test are found in =test_utilities.py=
+
+The classifier is also thoroughly tested in many regards, including for cases
+that aren't likely to exist, such as an unidentifiable property being passed for
+classification.
+
+These tests are found in =test_classifier.py=.
+
 
 * Planning
 
@@ -69,6 +93,171 @@ lot smaller now and my code is a little simpler.
 [[file:planning/20170904_174717.jpg]]
 *** Program
 
+See the programmingplan.dia file for the general structure of the core portions
+of the program. Not included here is miscellaneous database stuff that isn't
+particularly interesting or needed to understand how it works.
+
+** Object Tables
+*** engine
+**** classifier.py
+A naive bayesian classifier implementation that provides a general purpose,
+yet flexible method of classifying objects into classes.
+
+| Name                 | Type                | Documentation                                                                             |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| Type                 | Class               | Represents the various probabilities associated with a classification                     |
+|                      |                     | of objects. For instance it may hold the classification of the 'banana',                  |
+|                      |                     | and in which case it would have the probability of any random thing being a               |
+|                      |                     | banana as well as the probability of bananas being yellow, sweet or long.                 |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| cls                  | Field < Type        | The name of the type, e.g 'Banana'.                                                       |
+| class_probability    | Field < Type        | The probability of any given object being that type                                       |
+| property_probability | Field < Type        | A map of properties (e.g 'long', 'yellow') to probabilities.                              |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| train                | Method < Type       | Given a set of points known to be of the type described by the object,                    |
+|                      |                     | Sum and calculate the probabilities of these properties occurring in any                  |
+|                      |                     | random instance of that type.                                                             |
+| summarize            | Method < Type       | Return the class probability and property probability map (debug only)                    |
+| probability          | Method < Type       | Given a list of properties held by some unknown object, return the probability            |
+|                      |                     | the object belong to the type.                                                            |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| Classifier           | Class               | General purpose bayesian classifier. Given a set of properties (e.g                       |
+|                      |                     | long, sweet, yellow) the classifier can return what the object referred to                |
+|                      |                     | is likely to be given those properties (e.g banana).                                      |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| classes              | Field < Classifier  | A list of types (or classes, I named the class object Type because python reserves        |
+|                      |                     | the 'Class' keyword), that the classifier knows about (e.g 'Banana', 'Apple', 'Orange')   |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| train                | Method < Classifier | Given a list of properties and their associated types, train the classifier to recognize  |
+|                      |                     | them.                                                                                     |
+| classify             | Method < Classifier | Given a set of properties with an unknown type, use the bayesian probability to infer     |
+|                      |                     | what the unknown type is likely to be.                                                    |
+|----------------------+---------------------+-------------------------------------------------------------------------------------------|
+| group_by_class       | Function            | Take a list in the form [[type, prop1, prop2, ... propn] ... typen] and convert it into a |
+|                      |                     | mapping of types to properties, {type: [[prop1, prop2, prop3, ... propn] ...] ...}        |
+
+**** frequency.py
+Calculate the probability of encountering a word w, given that it is within
+the top 1000 most common words. P(r) is given by 0.1/r, where 1 < r < 1000.
+1000 words is the limit as beyond that the harmonic series diverges for less
+frequent words. About 50% of all words in the Oxford English Corpus reside in
+the top 100 words.
+
+| Name         | Type     | Documentation                        |
+|--------------+----------+--------------------------------------|
+| frequency_of | Function | Rank a word according to zipf's law. |
+|              |          | >>> frequency_of(1)                  |
+|              |          | 0.1                                  |
+|              |          | >>> frequency_of(3)                  |
+|              |          | 0.1 / 3                              |
+
+**** utilities.py
+| Name        | Type                | Documentation                                  |
+|-------------+---------------------+------------------------------------------------|
+| Node        | Class               | Node in circular doubly linked list.           |
+|             |                     | Holds a next pointer and previous pointer.     |
+|-------------+---------------------+------------------------------------------------|
+| next_node   | Field < Node        | Holds pointer to next node.                    |
+| prev_node   | Field < Node        | Holds pointer to previous node.                |
+| value       | Field < Node        | Holds the value of the node.                   |
+|-------------+---------------------+------------------------------------------------|
+| insert      | Method < Node       | Insert a node after this node.                 |
+|             |                     | Visual for inserting node b.                   |
+|             |                     | <- a -> <- c ->                                |
+|             |                     | <- a -> b <- c ->                              |
+|             |                     | next's previous should point to new node.      |
+|             |                     | previous's next should point to new node.      |
+|-------------+---------------------+------------------------------------------------|
+| CyclicList  | Class               | CyclicList is a circular, doubly linked list   |
+|-------------+---------------------+------------------------------------------------|
+| head        | Field < CyclicList  | Holds pointer to head of list.                 |
+| tail        | Field < CyclicList  | Holds pointer to end of list.                  |
+| length      | Field < CyclicList  | Keeps track of the length of the list.         |
+|-------------+---------------------+------------------------------------------------|
+| queue_back  | Method < CyclicList | Queue element at the end of the cyclic list.   |
+| queue_front | Method < CyclicList | Queue element at the front of the cyclic list. |
+| clear       | Method < CyclicList | Remove all elements from CyclicList.           |
+| delete      | Method < CyclicList | Delete element from CyclicList.                |
+| search      | Method < CyclicList | Search for node in CyclicList.                 |
+
+*** db
+**** words.py
+An interface for the words stored in the database.
+| Name            | Type     | Documentation                         |
+|-----------------+----------+---------------------------------------|
+| get_id_for_word | Function | Get the id of a word, given the word. |
+| get_word_for_id | Function | Get word for given id.                |
+| word_exists     | Function | Returns true if words is in database. |
+| get_word_list   | Function | Return a list of all words.           |
+| append_word     | Function | Append a word to the database.        |
+**** serializer.py
+Serialize objects into SQLITE database calls.
+
+See =serializer.py= for some usage examples of deserialize_from and insert_into,
+as they are intended to be used like abstract methods.
+
+| Name             | Type                  | Documentation                                                               |
+|------------------+-----------------------+-----------------------------------------------------------------------------|
+| Serializable     | Class                 | Serializable class that implements methods for objects wishing to           |
+|                  |                       | serialize to SQLITE tables. This is done with a serialize table that maps   |
+|                  |                       | property names to SQLITE table columns. When insert_into is called it takes |
+|                  |                       | the properties listed in serialize table and the corresponding table column |
+|                  |                       | names, building an SQLITE query to use on the database.                     |
+|------------------+-----------------------+-----------------------------------------------------------------------------|
+| serialize_table  | Field < Serializable  | Maps strings to object properties                                         |
+|------------------+-----------------------+-----------------------------------------------------------------------------|
+| deserialize_from | Method < Serializable | Deserialize object from the result of an sqlite SELECT call.                |
+| insert_into      | Method < Serializable | Serialize object into a sqlite INSERT call.                                 |
+*** ui
+Note that correction_dialog.py and speller.py are both auto generated by Qt
+designer, which was what I used for creating the user interfaces in without
+having to write the UI boilerplate code. As a result I don't document them here.
+
+**** manager.py
+
+| Name                      | Type                 | Documentation                                                                    |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| properties_of             | Function             | Map a word to a list of True/False points that describe it's properties.         |
+| correct_word_according_to | Function             | Take a given word, and feed it into the classifier, returning a list of          |
+|                           |                      | words that are likely correct.                                                   |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| Correcter                 | Class                | An object that holds the state of word corrections for the UI.                   |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| correcting_words          | Field < Correcter    | A list of words currently identified as misspelled.                              |
+| cached_corrections        | Field < Correcter    | A list of words it's already encountered, and past corrections for those         |
+|                           |                      | words.                                                                           |
+| dictionary                | Field < Correcter    | A set of words the correcter knows about.                                        |
+| cur_node                  | Field < Correcter    | A pointer to the word currently being corrected.                                 |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| update                    | Method < Correcter   | Update the list of incorrect words.                                              |
+| next                      | Method < Correcter   | Return corrections for the next unrecognized word.                               |
+| prev                      | Method < Correcter   | Return corrections for the previous unrecognized word.                           |
+| empty                     | Property < Correcter | Is True if there are no words to correct.                                        |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| UIManager                 | Class                | Container class used for managing UI actions and responding to them,             |
+|                           |                      | controls main UI window.                                                         |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| application               | Field < UIManager    | The QApplication object Qt demands for managing application resources.           |
+| main_window               | Field < UIManager    | The main window object.                                                          |
+| main_window_state         | Field < UIManager    | The state of the main window object.                                             |
+| conn                      | Field < UIManager    | Connection to the database.                                                      |
+| dictionary                | Field < UIManager    | Dictionary of words the UIManager knows about.                                   |
+| correcter                 | Field < UIManager    | An instance of the correcter class for correcting misspelled words.              |
+| correction_model          | Field < UIManager    | The model used to populate the corrections list.                                 |
+|---------------------------+----------------------+----------------------------------------------------------------------------------|
+| get_editor_words          | Method < Correcter   | Return a list of the words in the text (just a simple text string                |
+|                           |                      | split by a space).                                                               |
+| get_unrecognized_words    | Method < Correcter   | Filter a list of words into unrecognized words.                                  |
+| get_words                 | Method < Correcter   | Retrieve a list of words from the words database.                                |
+| replace_word              | Method < Correcter   | Replace a word within the textedit with the chosen correction.                   |
+| get_text_cursor           | Method < Correcter   | Return the current cursor position inside the text editor.                       |
+| display_corrections       | Method < Correcter   | Display a word with it's corrections in the spelling sidebar.                    |
+| next_word                 | Method < Correcter   | Take the next unrecognized word and display it.                                  |
+| prev_word                 | Method < Correcter   | Take the previous unrecognized word and display it.                              |
+| update_mistakes           | Method < Correcter   | Scan the document for new errors. Update correcter to recognize these new words. |
+| connect_slots             | Method < Correcter   | Connect UI slots for various ui objects.                                         |
+| load_classifier           | Method < Correcter   | Load the classifier from the database.                                           |
+| run                       | Method < Correcter   | Run UIManager instance, and start the GUI.                                      |
 * Versioning
 
 Versioning in my program was done chiefly through the use of the =git= version
