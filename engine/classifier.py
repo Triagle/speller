@@ -7,7 +7,10 @@ import json
 
 
 class Type(serializer.Serializable):
-    ''' Calculates the probability that an object belongs to a given class. '''
+    ''' Represents the various probabilities associated with a classification
+    of objects. For instance it may hold the classification of the 'banana',
+    and in which case it would have the probability of any random thing being a
+    banana as well as the probability of bananas being yellow, sweet or long. '''
 
     def __init__(self, cls, class_probability, property_probability=None):
         self.cls = cls
@@ -38,7 +41,8 @@ class Type(serializer.Serializable):
         return (self.class_probability, self.property_probability)
 
     def probability(self, properties):
-        ''' Return the classification of an object given it's properties. '''
+        ''' Return the probability of an object belong to the type given it's
+        properties. '''
         # P(t) = P(a) * P(a | b) * P(a | c) ... P(a | z)
 
         # P(a)
@@ -64,7 +68,9 @@ def as_classifier(dct):
 
 
 class Classifier(serializer.Serializable):
-    ''' General purpose bayesian classifier. '''
+    ''' General purpose bayesian classifier. Given a set of properties (e.g
+    long, sweet, yellow) the classifier can return what the object referred to
+    is likely to be given those properties (e.g banana). '''
 
     def __init__(self, classes=None):
         ''' Initialize Classifier. '''
@@ -75,7 +81,8 @@ class Classifier(serializer.Serializable):
         super().__init__(serialize_table)
 
     def train(self, dataset):
-        ''' Train the classifier from a dataset. '''
+        ''' Train the classifier from a dataset. Dataset must be transformed
+        using group_by_class first or by some other method. '''
         items = dataset.items()
         # get the length of the dataset by counting the length of each class.
         dataset_length = sum([len(v) for _, v in items])
@@ -130,9 +137,9 @@ class ClassifierEncoder(json.JSONEncoder):
 
 
 def group_by_class(dataset, cls_func=lambda x: (x[0], x[1:])):
-    ''' Group a list by it's class (or rather by function). e.g
-    group_by_class(lambda x: (x[0], x[1:]), [[1, 2, 3], [1, 3, 4]])
-    -> {1: [[2, 3], [3, 4]]} '''
+    ''' Group a list by into classes and instances of those classes.
+    >>> group_by_class([[1, 2, 3], [1, 3, 4]])
+    {1: [[2, 3], [3, 4]]} '''
     classes = {}
     for point in dataset:
         cls, props = cls_func(point)

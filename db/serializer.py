@@ -1,4 +1,7 @@
-class Serializable(object):
+''' Serialize objects into SQLITE database calls. '''
+
+
+class Serializable:
     ''' Serializable class that implements methods for objects wishing to
     serialize to SQLITE tables. This is done with a serialize table that maps
     property names to SQLITE table columns. When insert_into is called it takes

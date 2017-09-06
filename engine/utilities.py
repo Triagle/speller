@@ -78,8 +78,8 @@ class CyclicList:
 
     def delete(self, node):
         ''' Delete element from CyclicList. '''
-        if self.length == 1:
-            # Handle special case where CyclicList has exactly one element.
+        if self.length <= 1:
+            # Handle special case where CyclicList has exactly one or zero elements.
             self.clear()
         else:
             # Make the previous pointer's next pointer current node's next pointer

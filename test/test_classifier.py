@@ -80,3 +80,8 @@ def test_classifier():
     # more often therefore the class should be apple.
     _, prediction = bclassifier.classify(["round", "sweet"])
     assert prediction == Class.APPLE
+
+    # This shouldn't realistically happen, but I do test if the classifer is passed things
+    # that aren't in any of the three classes sets. In this case it should return (0, None).
+    prediction = bclassifier.classify(['pink'])
+    assert prediction == (0, None)

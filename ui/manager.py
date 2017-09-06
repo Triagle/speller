@@ -59,6 +59,7 @@ def correct_words_according_to(word_tuple, word_classifier, dictionary):
 
 
 class Correcter:
+    ''' An object that holds the state of word corrections for the UI. '''
     def __init__(self, dictionary, classifier, words):
         ''' Initialize Corrector class. '''
         self.correcting_words = utilities.CyclicList(values=words)
@@ -123,7 +124,8 @@ class Correcter:
 
 
 class UIManager:
-    ''' Manage UI state. '''
+    ''' Container class used for managing UI actions and responding to them,
+    controls main UI window. '''
     def get_editor_words(self):
         '''return a list of the words in the text (just a simple text string
         split by a space).'''
@@ -132,6 +134,7 @@ class UIManager:
         return text_editor_text.split(' ')
 
     def get_unrecognized_words(self, candidates):
+        ''' Filter a list of words into unrecognized words. '''
         text_editor_words = self.get_editor_words()
         cur_pos = 0
         unrecognized_words = []
@@ -159,6 +162,7 @@ class UIManager:
         return words.get_word_list(cursor, ids=True)
 
     def replace_word(self, word, item_index):
+        ''' Replace a word within the textedit with the chosen correction. '''
         text_editor = self.main_window_state.textEdit
         text_editor_text = text_editor.toPlainText()
         item = self.corrections_model.itemFromIndex(item_index)

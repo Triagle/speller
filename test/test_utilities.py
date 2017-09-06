@@ -2,11 +2,15 @@ from engine import utilities
 
 
 def test_node():
+    # There is only one method for the Node class, therefore only one test.
     node = utilities.Node(3)
     node.prev_node = node
     node.next_node = node
     node.insert(utilities.Node(4))
     node.insert(utilities.Node(5))
+
+    # Boilerplate to accumulate each element in the list and ensure it matches
+    # the order inserted.
     cur = node
     have_cycled = False
     node_list = []
@@ -14,6 +18,7 @@ def test_node():
         node_list.append(cur.value)
         cur = cur.next_node
         have_cycled = cur == node
+
     assert node_list == [3, 5, 4]
 
 
@@ -73,3 +78,10 @@ def test_cyclic_list():
     # Testing the __contains__ implementation.
     assert 3 not in cyclic_lst
     assert 1 in cyclic_lst
+
+    # Testing that the "clear" method doesn't bork things if called twice.
+
+    cyclic_lst.clear()
+    cyclic_lst.clear()
+    cyclic_lst.queue_back(3)
+    assert cyclic_lst.head.value == 3
