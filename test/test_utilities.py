@@ -4,6 +4,8 @@ from engine import utilities
 def test_node():
     # There is only one method for the Node class, therefore only one test.
     node = utilities.Node(3)
+    # Test str function works
+    assert str(node) == '3'
     node.prev_node = node
     node.next_node = node
     node.insert(utilities.Node(4))
@@ -70,6 +72,14 @@ def test_cyclic_list():
     assert cyclic_lst.tail.prev_node.value == 1
     assert cyclic_lst.tail.next_node.value == 1
     assert cyclic_lst.length == 2
+    assert len(cyclic_lst) == cyclic_lst.length
+    # Make sure tail deletion also works
+    cyclic_lst.delete(cyclic_lst.tail)
+    assert cyclic_lst.head.value == 1
+    assert cyclic_lst.head.next_node == cyclic_lst.head
+    assert cyclic_lst.head.prev_node == cyclic_lst.head
+
+    cyclic_lst.queue_back(2)
 
     # search has no special cases
     assert cyclic_lst.search(1)

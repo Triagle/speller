@@ -114,7 +114,7 @@ class CyclicList:
         ''' Return the length of a CyclicList. '''
         return self.length
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         cur = self.head
         result = ''
         while cur != self.tail:

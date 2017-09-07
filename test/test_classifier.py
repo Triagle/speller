@@ -1,5 +1,6 @@
 from engine import classifier
 from enum import Enum
+import collections
 
 
 class Class(Enum):
@@ -85,3 +86,22 @@ def test_classifier():
     # that aren't in any of the three classes sets. In this case it should return (0, None).
     prediction = bclassifier.classify(['pink'])
     assert prediction == (0, None)
+
+
+def test_classifier_json():
+    bclassifier = classifier.Classifier()
+    result_type = classifier.Type('class', 1)
+    result_type.train([[1, 2, 3]])
+    bclassifier.classes.append(result_type)
+    assert bclassifier.as_json() == {'__classifier__': True,
+                                     'classes': [result_type]}
+
+
+def test_type():
+    btype = classifier.Type('class', 1)
+    assert btype.summarize() == (1, collections.Counter())
+    assert repr(btype) == f'Type(class, {collections.Counter()})'
+    assert btype.as_json() == {'__type__': True,
+                               'class': 'class',
+                               'class_probability': 1,
+                               'properties': collections.Counter()}
