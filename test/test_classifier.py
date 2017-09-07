@@ -88,16 +88,42 @@ def test_classifier():
     assert prediction == (0, None)
 
 
+JSON_REP = ('{"__classifier__": true, '
+            '"classes": ['
+            '{"__type__": true, "class": "class", "class_probability": 1, '
+            '"properties": {"1": 1.0, "2": 1.0, "3": 1.0}}]}')
+
+
 def test_classifier_json():
+    # Test that the classifier serializes to json properly.
+    # Edge cases are handled by python's json library
     bclassifier = classifier.Classifier()
     result_type = classifier.Type('class', 1)
-    result_type.train([[1, 2, 3]])
+    result_type.train([['1', '2', '3']])
     bclassifier.classes.append(result_type)
     assert bclassifier.as_json() == {'__classifier__': True,
                                      'classes': [result_type]}
+    json_rep = bclassifier.json_rep
+    # Note this test may not work in python != 3.6
+    # Since it relies on dictionary ordering.
+    assert json_rep == JSON_REP
+
+    nclassifier = classifier.Classifier()
+    nclassifier.json_rep = JSON_REP
+    assert nclassifier.json_rep == bclassifier.json_rep
+
+
+def test_classifier_rep():
+    bclassifier = classifier.Classifier()
+    result_type = classifier.Type('class', 1)
+    result_type.train([['1', '2', '3']])
+    bclassifier.classes.append(result_type)
+    assert repr(bclassifier) == 'Classifier([Type(class, Counter({\'1\': 1.0, \'2\': 1.0, \'3\': 1.0}))])'
 
 
 def test_type():
+    # Test that types serialize to json properly.
+    # Edge cases are handled by python's json library
     btype = classifier.Type('class', 1)
     assert btype.summarize() == (1, collections.Counter())
     assert repr(btype) == f'Type(class, {collections.Counter()})'
@@ -105,3 +131,18 @@ def test_type():
                                'class': 'class',
                                'class_probability': 1,
                                'properties': collections.Counter()}
+
+
+def test_as_classifier():
+    # Test that the object hooks to deserialize json objects work properly.
+    # Edge cases are handled by python's json library.
+    assert classifier.as_classifier({'__classifier__': True, 'classes': 1}) == 1
+    assert classifier.as_classifier({'__type__': True,
+                                     'class': 'fruit',
+                                     'class_probability': 1,
+                                     'properties': {
+                                         'fruit': 0.5,
+                                         'banana': 1
+                                     }}) == ('fruit', 1, {'fruit': 0.5, 'banana': 1.0})
+    # Test that things that aren't types and aren't classifiers are just returned
+    assert classifier.as_classifier({'active': True, 'response_time': 0.5}) == {'active': True, 'response_time': 0.5}
