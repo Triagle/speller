@@ -6,7 +6,7 @@ from collections import Counter
 import json
 
 
-class Type(serializer.Serializable):
+class Type:
     ''' Represents the various probabilities associated with a classification
     of objects. For instance it may hold the classification of the 'banana',
     and in which case it would have the probability of any random thing being a
@@ -75,9 +75,9 @@ class Classifier(serializer.Serializable):
     def __init__(self, classes=None):
         ''' Initialize Classifier. '''
         self.classes = classes or []
-        serialize_table = {
-            'data': 'json_rep'
-        }
+        serialize_table = [
+            ('data', 'json_rep')
+        ]
         super().__init__(serialize_table)
 
     def train(self, dataset):
@@ -120,6 +120,7 @@ class Classifier(serializer.Serializable):
             prob *= assumptions.get(cls, 1)
             (max_prob, _) = likely_cls
             if prob > max_prob:
+
                 likely_cls = (prob, cls.cls)
         return likely_cls
 

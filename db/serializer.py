@@ -25,8 +25,8 @@ class Serializable:
         >>> test_class = DeserializeMe(None)
         >>> test_class.deserialize_from(result)
         >>> assertEquals(test_class.name, 'jake') '''
-        deserialize_map = self.serialize_table.values()
-        for prop, value in zip(deserialize_map, row):
+        properties = [prop for _, prop in self.serialize_table]
+        for prop, value in zip(properties, row):
             setattr(self, prop, value)
 
     def insert_into(self, sqlite_table):
@@ -40,8 +40,8 @@ class Serializable:
         >>> test = SerializeMe('jack')
         >>> query = test.insert_into('names')
         >>> assertEquals(query, ('INSERT INTO names (name) VALUES (?)', 'jack')) '''
-        keys = ', '.join(list(self.serialize_table))
-        values = [getattr(self, prop) for prop in self.serialize_table.values()]
+        keys = ', '.join(column for column, _ in self.serialize_table)
+        values = [getattr(self, prop) for _, prop in self.serialize_table]
         placeholders = ', '.join('?' for value in values)
         sqlite_query_format = f'INSERT INTO {sqlite_table} ({keys}) VALUES ({placeholders})'
         return sqlite_query_format, values
