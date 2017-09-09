@@ -60,6 +60,65 @@ classification.
 
 These tests are found in =test_classifier.py=.
 
+Here is the output of the tests I ran:
+
+
+(Please note the "16" tests passed is inaccurate, there are many more assert
+statements, it only counts each individual function).
+
+#+BEGIN_EXAMPLE
+============================= test session starts ==============================
+platform linux -- Python 3.6.2, pytest-3.2.1, py-1.4.34, pluggy-0.4.0
+rootdir: /media/jake/Files/repos/py/speller, inifile:
+plugins: cov-2.5.1, aiohttp-json-rpc-0.8.1
+collected 16 items
+
+test/test_classifier.py ......
+test/test_frequency.py .
+test/test_serializer.py ..
+test/test_utilities.py ..
+test/test_words.py .....
+
+========================== 16 passed in 1.65 seconds ===========================
+#+END_EXAMPLE
+
+Furthermore I also have coverage reports, which show that for every file the
+coverage was at 100%. This means that every class, for loop, if statement and
+line is hit at some point in the testing procedure, even the ones there for
+debug.
+
+Here is the output for the =db= module:
+
+#+BEGIN_EXAMPLE
+----------- coverage: platform linux, python 3.6.2-final-0 -----------
+Name               Stmts   Miss  Cover   Missing
+------------------------------------------------
+db/serializer.py      13      0   100%
+db/words.py           20      0   100%
+------------------------------------------------
+TOTAL                 33      0   100%
+
+
+========================== 16 passed in 1.81 seconds ===========================
+#+END_EXAMPLE
+
+Here is the output for the engine module:
+
+#+BEGIN_EXAMPLE
+----------- coverage: platform linux, python 3.6.2-final-0 -----------
+Name                   Stmts   Miss  Cover   Missing
+----------------------------------------------------
+engine/__init__.py         0      0   100%
+engine/classifier.py      76      0   100%
+engine/frequency.py        3      0   100%
+engine/utilities.py       69      0   100%
+----------------------------------------------------
+TOTAL                    148      0   100%
+
+
+========================== 16 passed in 1.79 seconds ===========================
+#+END_EXAMPLE
+
 
 * Planning
 
@@ -78,6 +137,8 @@ at the same time.
 
 [[file:planning/20170903_153350.jpg]]
 *** Database
+The database started out way more complex than I ultimately needed it to be, so
+it changed to reflect that in the final program.
 [[file:planning/20170904_173515.jpg]]
 [[file:planning/20170904_172856.jpg]]
 *** Program
@@ -88,6 +149,13 @@ product through optimizations and stakeholder revision. Notably my database is a
 lot smaller now and my code is a little simpler.
 
 *** GUI
+
+My GUI didn't change all that much over the course of development, it became a
+little simpler as I aimed to remove buttons and instead adopt a DWIM (Do What I
+Mean, not what I tell you) approach. This meant that the program had to infer a
+little more about what the user was trying to do rather than have them say it
+outright to them, but was definitely worth the effort from a UX perspective.
+
 [[file:planning/20170903_154450.jpg]]
 *** Database
 [[file:planning/20170904_174717.jpg]]
@@ -257,7 +325,7 @@ having to write the UI boilerplate code. As a result I don't document them here.
 | update_mistakes           | Method < Correcter   | Scan the document for new errors. Update correcter to recognize these new words. |
 | connect_slots             | Method < Correcter   | Connect UI slots for various ui objects.                                         |
 | load_classifier           | Method < Correcter   | Load the classifier from the database.                                           |
-| run                       | Method < Correcter   | Run UIManager instance, and start the GUI.                                      |
+| run                       | Method < Correcter   | Run UIManager instance, and start the GUI.                                       |
 * Versioning
 
 Versioning in my program was done chiefly through the use of the =git= version
